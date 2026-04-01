@@ -201,6 +201,14 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: #2e7d32
 .auth-subtitle { text-align: center; color: #888; font-size: 14px; margin-bottom: 24px; }
 .auth-link { text-align: center; color: #666; margin-top: 14px; font-size: 14px; cursor: pointer; }
 .auth-link span { color: #2e7d32; font-weight: 700; }
+
+/* Auth Split Layout */
+.auth-split { display: flex; min-height: 100vh; }
+.auth-image-panel { flex: 1; position: relative; display: none; }
+.auth-image-overlay { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(10,61,31,0.85), rgba(46,125,50,0.6)); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.auth-form-panel { flex: 1; display: flex; align-items: center; justify-content: center; background: #f0f2f5; padding: 24px; }
+.auth-form-panel .auth-page { margin: 0; width: 100%; max-width: 420px; }
+@media (min-width: 768px) { .auth-image-panel { display: block; } }
 .cart-footer { background: #fff; border-top: 2px solid #f0f0f0; padding: 16px 20px; position: sticky; bottom: 0; display: flex; justify-content: space-between; align-items: center; }
 
 /* ── BANNER DEALS ── */

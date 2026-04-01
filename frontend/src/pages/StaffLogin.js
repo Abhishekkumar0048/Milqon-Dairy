@@ -31,8 +31,9 @@ export default function StaffLogin() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f0f2f5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ background: '#fff', borderRadius: 20, padding: 36, width: '100%', maxWidth: 400, boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}>
+    <div style={{ minHeight: '100vh', background: '#f0f2f5', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundImage: 'url(/nature.jpeg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(10,61,31,0.7)' }} />
+      <div style={{ background: '#fff', borderRadius: 20, padding: 36, width: '100%', maxWidth: 400, boxShadow: '0 8px 32px rgba(0,0,0,0.12)', position: 'relative', zIndex: 1 }}>
 
         {/* Role Toggle */}
         <div style={{ display: 'flex', gap: 10, marginBottom: 28 }}>
