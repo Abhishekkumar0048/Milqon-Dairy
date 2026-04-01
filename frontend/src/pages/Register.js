@@ -1,13 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 
+const SLIDES = ['/milk1.jpg', '/milk2.jpg', '/milk3.jpg', '/milk4.jpg'];
+
 export default function Register() {
   const [form, setForm] = useState({ name: '', email: '', password: '', phone: '', address: '' });
+  const [slide, setSlide] = useState(0);
   const { login } = useAuth();
   const navigate = useNavigate();
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  useEffect(() => {
+    const t = setInterval(() => setSlide(s => (s + 1) % SLIDES.length), 3000);
+    return () => clearInterval(t);
+  }, []);
 
   const handleRegister = async () => {
     try {
@@ -22,11 +30,16 @@ export default function Register() {
   return (
     <div className="auth-split">
       <div className="auth-image-panel">
-        <img src="/nature.jpeg" alt="Milqon Dairy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        {SLIDES.map((src, i) => (
+          <img key={i} src={src} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: slide === i ? 1 : 0, transition: 'opacity 0.8s ease' }} />
+        ))}
         <div className="auth-image-overlay">
           <img src="/logo.jpeg" alt="logo" style={{ width: 70, height: 70, borderRadius: 16, objectFit: 'cover', marginBottom: 16 }} />
           <h2 style={{ color: '#fff', fontSize: 28, fontWeight: 800, margin: 0 }}>Milqon Dairy</h2>
           <p style={{ color: '#c8e6c9', fontSize: 14, marginTop: 8 }}>Har Ghar Ka Bharosa</p>
+          <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+            {SLIDES.map((_, i) => <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: slide === i ? '#fff' : 'rgba(255,255,255,0.4)', transition: 'all 0.3s' }} />)}
+          </div>
         </div>
       </div>
       <div className="auth-form-panel">
