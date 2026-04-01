@@ -19,7 +19,7 @@ a { text-decoration: none; color: inherit; }
 .topbar { background: #0a3d1f; color: #cde8d4; font-size: 12px; text-align: center; padding: 6px; letter-spacing: 0.5px; }
 
 /* ── NAVBAR ── */
-.navbar { background: #fff; border-bottom: 2px solid #e0e0e0; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 68px; position: sticky; top: 0; z-index: 200; box-shadow: 0 2px 8px rgba(0,0,0,0.08); gap: 16px; }
+.navbar { background: #fff; border-bottom: 2px solid #e0e0e0; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 68px; position: sticky; top: 0; z-index: 200; box-shadow: 0 2px 8px rgba(0,0,0,0.08); gap: 16px; flex-wrap: wrap; }
 
 .navbar-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0; }
 .logo-img { width: 44px; height: 44px; border-radius: 12px; object-fit: cover; box-shadow: 0 2px 8px rgba(27,94,32,0.3); }
@@ -235,11 +235,17 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: #2e7d32
 @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
 /* ── RESPONSIVE ── */
+.hamburger { display: none; background: none; border: none; font-size: 24px; cursor: pointer; color: #1b5e20; padding: 8px; }
 @media (max-width: 768px) {
+  .hamburger { display: block; }
   .navbar-search { display: none; }
-  .hero-banner { padding: 40px 24px; }
+  .navbar-links { display: none; flex-direction: column; position: absolute; top: 68px; left: 0; right: 0; background: #fff; border-bottom: 2px solid #e0e0e0; padding: 12px; z-index: 999; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+  .navbar-links.open { display: flex; }
+  .nav-link { width: 100%; padding: 12px 16px; border-radius: 8px; }
+  .hero-banner { height: auto; padding: 0; }
   .hero-banner h1 { font-size: 28px; }
   .offer-strip { grid-template-columns: repeat(2, 1fr); }
   .deals-grid { grid-template-columns: 1fr; }
   .product-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  .slider-wrapper { height: 220px; }
 }

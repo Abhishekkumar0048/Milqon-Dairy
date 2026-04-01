@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { BrowserRouter, Routes, Route, NavLink, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider, useCart } from './context/CartContext';
@@ -18,10 +19,11 @@ function Navbar() {
   const { user, logout } = useAuth();
   const { cart } = useCart();
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <>
-      <div className="topbar">🚚 Free delivery on orders above ₹299 &nbsp;|&nbsp; 🥛 Fresh dairy every morning &nbsp;|&nbsp; 📞 Call us: 1800-MILQON</div>
+      <div className="topbar">🚚 Free delivery on orders above ₹299 &nbsp;|&nbsp; 🥛 Fresh dairy every morning &nbsp;|&nbsp; 📞 Call us: +91-XXXXXXXXXX</div>
       <nav className="navbar">
         <NavLink to="/" className="navbar-logo">
           <img src="/logo.jpeg" alt="Milqon Dairy" className="logo-img" />
@@ -36,23 +38,25 @@ function Navbar() {
           <button onClick={() => navigate('/products')}>🔍</button>
         </div>
 
-        <div className="navbar-links">
-          <NavLink to="/products" className="nav-link">🛍️ Products</NavLink>
-          <NavLink to="/cart" className="nav-link">
+        <button className="hamburger" onClick={() => setMenuOpen(o => !o)}>{menuOpen ? '✕' : '☰'}</button>
+
+        <div className={`navbar-links${menuOpen ? ' open' : ''}`}>
+          <NavLink to="/products" className="nav-link" onClick={() => setMenuOpen(false)}>🛍️ Products</NavLink>
+          <NavLink to="/cart" className="nav-link" onClick={() => setMenuOpen(false)}>
             🛒 Cart {cart.length > 0 && <span className="badge">{cart.length}</span>}
           </NavLink>
           {user ? (
             <>
-              <NavLink to="/my-orders" className="nav-link">📦 Orders</NavLink>
-              {user.role === 'admin' && <NavLink to="/admin" className="nav-link">⚙️ Admin</NavLink>}
-              {['admin', 'delivery'].includes(user.role) && <NavLink to="/delivery" className="nav-link">🚚 Delivery</NavLink>}
-              <NavLink to="/profile" className="nav-link">👤 {user.name}</NavLink>
-              <button className="nav-link" onClick={() => { logout(); navigate('/'); }} style={{background:'none',border:'none',cursor:'pointer',color:'inherit'}}>Logout</button>
+              <NavLink to="/my-orders" className="nav-link" onClick={() => setMenuOpen(false)}>📦 Orders</NavLink>
+              {user.role === 'admin' && <NavLink to="/admin" className="nav-link" onClick={() => setMenuOpen(false)}>⚙️ Admin</NavLink>}
+              {['admin', 'delivery'].includes(user.role) && <NavLink to="/delivery" className="nav-link" onClick={() => setMenuOpen(false)}>🚚 Delivery</NavLink>}
+              <NavLink to="/profile" className="nav-link" onClick={() => setMenuOpen(false)}>👤 {user.name}</NavLink>
+              <button className="nav-link" onClick={() => { logout(); navigate('/'); setMenuOpen(false); }} style={{background:'none',border:'none',cursor:'pointer',color:'inherit'}}>Logout</button>
             </>
           ) : (
             <>
-              <NavLink to="/login" className="nav-link nav-btn-login">Login</NavLink>
-              <NavLink to="/register" className="nav-link">Register</NavLink>
+              <NavLink to="/login" className="nav-link nav-btn-login" onClick={() => setMenuOpen(false)}>Login</NavLink>
+              <NavLink to="/register" className="nav-link" onClick={() => setMenuOpen(false)}>Register</NavLink>
             </>
           )}
         </div>
