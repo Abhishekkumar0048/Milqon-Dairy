@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BrowserRouter, Routes, Route, NavLink, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider, useCart } from './context/CartContext';
 import Home from './pages/Home';
@@ -19,7 +19,11 @@ function Navbar() {
   const { user, logout } = useAuth();
   const { cart } = useCart();
   const navigate = useNavigate();
+  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const hideNav = ['/login', '/register', '/forgot-password', '/staff-login'].includes(location.pathname);
+  if (hideNav) return null;
 
   return (
     <>
@@ -66,6 +70,9 @@ function Navbar() {
 }
 
 function Footer() {
+  const location = useLocation();
+  const hideFooter = ['/login', '/register', '/forgot-password', '/staff-login'].includes(location.pathname);
+  if (hideFooter) return null;
   return (
     <footer className="footer">
       <div className="footer-logo"><img src="/logo.jpeg" alt="Milqon Dairy" style={{ width: 36, height: 36, borderRadius: 8, verticalAlign: 'middle', marginRight: 8 }} />Milqon Dairy</div>
