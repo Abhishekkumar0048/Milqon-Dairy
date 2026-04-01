@@ -8,7 +8,7 @@ require('dotenv').config();
 const app = express();
 
 app.use(helmet({ crossOriginResourcePolicy: false }));
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+app.use(cors({ origin: ['http://localhost:3000', 'https://milqon-dairy.vercel.app'], credentials: true }));
 app.use(express.json());
 
 // Rate limiting — 100 requests per 15 min per IP

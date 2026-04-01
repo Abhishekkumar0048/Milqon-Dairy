@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🥛 Milqon Dairy App
 
 An online dairy shop where customers can order milk, paneer, curd, ghee, butter, lassi, chach, makhan, peda and more with home delivery.
@@ -70,3 +71,6 @@ Register normally, then update role in MongoDB:
 ```js
 db.users.updateOne({ email: "admin@milqondairy.com" }, { $set: { role: "admin" } })
 ```
+=======
+# Milqon-Dairy
+>>>>>>> 4be98bab04c0d726a73c12df904e33a5e0de2ca7
