@@ -27,8 +27,23 @@ app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/payment', require('./routes/payment'));
 
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => {
+  .then(async () => {
     console.log('MongoDB connected');
+    // Auto-create admin and delivery users if not exist
+    const bcrypt = require('bcryptjs');
+    const User = require('./models/User');
+    const adminExists = await User.findOne({ email: 'admin@milqondairy.com' });
+    if (!adminExists) {
+      const hash = await bcrypt.hash('Milqon@123', 10);
+      await User.create({ name: 'Admin', email: 'admin@milqondairy.com', password: hash, role: 'admin' });
+      console.log('Admin user created');
+    }
+    const deliveryExists = await User.findOne({ email: 'delivery@milqon.com' });
+    if (!deliveryExists) {
+      const hash = await bcrypt.hash('delivery123', 10);
+      await User.create({ name: 'Delivery Boy', email: 'delivery@milqon.com', password: hash, role: 'delivery' });
+      console.log('Delivery user created');
+    }
     app.listen(process.env.PORT, () =>
       console.log(`Server running on port ${process.env.PORT}`)
     );
