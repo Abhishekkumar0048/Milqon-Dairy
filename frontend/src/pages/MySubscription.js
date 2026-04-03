@@ -51,7 +51,7 @@ export default function MySubscription() {
   const [loading, setLoading] = useState(true);
   const [selMonth, setSelMonth] = useState(new Date().getMonth() + 1);
   const [selYear] = useState(new Date().getFullYear());
-  const [reqForm, setReqForm] = useState({ quantity: 1, address: '', phone: '' });
+  const [reqForm, setReqForm] = useState({ quantity: 1, address: '', phone: '', name: '' });
   const [reqMsg, setReqMsg] = useState('');
   const [reqLoading, setReqLoading] = useState(false);
   const setR = (k, v) => setReqForm(f => ({ ...f, [k]: v }));
@@ -62,16 +62,26 @@ export default function MySubscription() {
   }, [user]);
 
   const submitRequest = async () => {
-    if (!reqForm.address || !reqForm.phone) return setReqMsg('Please fill address and phone');
+    if (!reqForm.name || !reqForm.address || !reqForm.phone) return setReqMsg('Please fill all required fields');
     setReqLoading(true);
     try {
-      const { data } = await api.post('/subscriptions/request', reqForm);
+      const { data } = await api.post('/subscriptions/request', { ...reqForm, name: reqForm.name });
       setSub(data);
       setReqMsg('');
     } catch (err) {
       setReqMsg(err.response?.data?.message || 'Failed to submit request');
     }
     setReqLoading(false);
+  };
+
+  const cancelSubscription = async () => {
+    if (!window.confirm('Are you sure you want to cancel your subscription?')) return;
+    try {
+      await api.put(`/subscriptions/${sub._id}`, { active: false, cancelled: true });
+      setSub(s => ({ ...s, active: false, cancelled: true }));
+    } catch {
+      alert('Failed to cancel. Try again.');
+    }
   };
 
   if (loading) return <div style={{ textAlign: 'center', padding: 60, color: '#888' }}>Loading...</div>;
@@ -84,6 +94,10 @@ export default function MySubscription() {
         <p style={{ color: '#888', fontSize: 14 }}>Fresh milk delivered to your door every morning</p>
       </div>
       <div style={{ background: '#fff', borderRadius: 16, padding: 24, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
+        <div className="form-group">
+          <label>Full Name *</label>
+          <input placeholder="Your full name" value={reqForm.name} onChange={e => setR('name', e.target.value)} />
+        </div>
         <div className="form-group">
           <label>Phone Number *</label>
           <input placeholder="Your phone number" value={reqForm.phone} onChange={e => setR('phone', e.target.value)} />
@@ -158,6 +172,15 @@ export default function MySubscription() {
             {sub.active ? '🟢 Active' : '🔴 Paused'}
           </span>
         </div>
+        {sub.active && !sub.cancelled && (
+          <button onClick={cancelSubscription}
+            style={{ marginTop: 16, background: 'rgba(198,40,40,0.2)', border: '1px solid rgba(255,255,255,0.3)', color: '#fff', borderRadius: 8, padding: '8px 18px', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+            ❌ Cancel Subscription
+          </button>
+        )}
+        {sub.cancelled && (
+          <div style={{ marginTop: 12, background: 'rgba(198,40,40,0.3)', borderRadius: 8, padding: '8px 14px', fontSize: 13, fontWeight: 700 }}>❌ Subscription Cancelled</div>
+        )}
       </div>
 
       {/* Month Selector */}

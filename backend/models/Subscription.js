@@ -16,6 +16,7 @@ const subscriptionSchema = new mongoose.Schema({
   pricePerLitre: { type: Number, required: true },
   startDate:  { type: String, required: true },  // YYYY-MM-DD
   active:     { type: Boolean, default: true },
+  cancelled:  { type: Boolean, default: false },
   attendance: [attendanceSchema],
   paidMonths: [{ type: String }], // format: "YYYY-MM"
 }, { timestamps: true });

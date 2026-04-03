@@ -97,6 +97,18 @@ router.post('/:id/pay', auth, async (req, res) => {
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
+// PUT cancel subscription (user)
+router.put('/:id/cancel', auth, async (req, res) => {
+  try {
+    const sub = await Subscription.findOne({ _id: req.params.id, user: req.user.id });
+    if (!sub) return res.status(404).json({ message: 'Subscription not found' });
+    sub.active = false;
+    sub.cancelled = true;
+    await sub.save();
+    res.json(sub);
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
 // DELETE subscription (admin)
 router.delete('/:id', adminAuth, async (req, res) => {
   try {
