@@ -187,7 +187,7 @@ export default function SubscriptionAdmin() {
           <div key={sub._id} style={{ background: '#fff', borderRadius: 16, padding: 20, marginBottom: 16, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', borderLeft: `4px solid ${sub.active ? (activeTab === 'morning' ? '#ff8f00' : '#5c35cc') : '#ccc'}` }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
               <div>
-                <div style={{ fontWeight: 800, fontSize: 16 }}>👤 {sub.name} <span style={{ fontSize: 13, fontWeight: 600, color: activeTab === 'morning' ? '#ff8f00' : '#5c35cc' }}>{sub.deliveryTime === 'evening' ? '🌆 Evening' : '🌅 Morning'}</span></div>
+                <div style={{ fontWeight: 800, fontSize: 16 }}>👤 {sub.name || 'No Name'} <span style={{ fontSize: 13, fontWeight: 600, color: activeTab === 'morning' ? '#ff8f00' : '#5c35cc' }}>{sub.deliveryTime === 'evening' ? '🌆 Evening' : '🌅 Morning'}</span></div>
                 <div style={{ fontSize: 13, color: '#666', marginTop: 2 }}>📞 {sub.phone} &nbsp;|&nbsp; 📍 {sub.address}</div>
                 <div style={{ fontSize: 13, color: '#1b5e20', fontWeight: 700, marginTop: 4 }}>
                   🥛 {sub.quantity}L/day &nbsp;·&nbsp; ₹{sub.pricePerLitre}/L &nbsp;·&nbsp; Since {sub.startDate}

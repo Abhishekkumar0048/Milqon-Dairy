@@ -41,17 +41,18 @@ router.post('/request', auth, async (req, res) => {
     const me = await User.findById(req.user.id);
     const existing = await Subscription.findOne({ $or: [{ user: req.user.id }, { phone: me?.phone }] });
     if (existing) return res.status(400).json({ message: 'You already have a subscription' });
-    const { quantity, address, phone } = req.body;
+    const { quantity, address, phone, name, deliveryTime } = req.body;
     const sub = await Subscription.create({
       user: req.user.id,
-      name: me.name,
+      name: name || me.name,
       phone: phone || me.phone || '',
       address,
       milkType: 'Full Cream Milk',
       quantity: Number(quantity),
       pricePerLitre: 60,
+      deliveryTime: deliveryTime || 'morning',
       startDate: new Date().toISOString().split('T')[0],
-      active: false, // pending admin approval
+      active: false,
     });
     res.status(201).json(sub);
   } catch (err) { res.status(500).json({ message: err.message }); }
