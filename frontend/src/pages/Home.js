@@ -194,8 +194,8 @@ export default function Home() {
             {trustItems.map(t => (
               <div key={t.title} className="trust-card" style={{ background: t.bg, border: `2px solid ${t.border}`, borderRadius: 16 }}>
                 <div className="trust-icon" style={{ background: t.iconBg, borderRadius: '50%', width: 64, height: 64, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, margin: '0 auto 12px' }}>{t.icon}</div>
-                <div className="trust-title">{t.title}</div>
-                <div className="trust-desc">{t.desc}</div>
+                <div className="trust-title" style={{ color: '#111' }}>{t.title}</div>
+                <div className="trust-desc" style={{ color: '#333' }}>{t.desc}</div>
               </div>
             ))}
           </div>
