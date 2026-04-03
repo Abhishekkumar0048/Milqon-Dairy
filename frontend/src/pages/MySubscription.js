@@ -79,7 +79,7 @@ export default function MySubscription() {
   if (!sub) return (
     <div className="container" style={{ maxWidth: 500, paddingTop: 48 }}>
       <div style={{ textAlign: 'center', marginBottom: 28 }}>
-        <div style={{ fontSize: 64 }}>🥛</div>
+        <img src="/milqon-milk.jpeg" alt="Milk" style={{ width: 100, height: 100, borderRadius: '50%', objectFit: 'cover', boxShadow: '0 4px 16px rgba(46,125,50,0.25)', marginBottom: 12, border: '3px solid #2e7d32' }} />
         <h2 style={{ color: '#1b5e20', margin: '12px 0 6px' }}>Subscribe for Daily Milk</h2>
         <p style={{ color: '#888', fontSize: 14 }}>Fresh milk delivered to your door every morning</p>
       </div>
