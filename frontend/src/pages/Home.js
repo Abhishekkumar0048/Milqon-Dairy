@@ -42,10 +42,10 @@ const reviews = [
 ];
 
 const trustItems = [
-  { icon: '🏆', title: '10,000+ Customers', desc: 'Trusted by families across the city' },
-  { icon: '🧪', title: 'Lab Tested', desc: 'Every batch tested for purity' },
-  { icon: '🚚', title: 'On-Time Delivery', desc: 'Fresh by 7 AM every morning' },
-  { icon: '🌿', title: 'No Chemicals', desc: 'Zero preservatives, 100% natural' },
+  { icon: '🏆', title: '10,000+ Customers', desc: 'Trusted by families across the city', bg: 'linear-gradient(135deg,#fff8e1,#ffe082)', border: '#f9a825', iconBg: '#fff3cd' },
+  { icon: '🧪', title: 'Lab Tested', desc: 'Every batch tested for purity', bg: 'linear-gradient(135deg,#e3f2fd,#90caf9)', border: '#1565c0', iconBg: '#bbdefb' },
+  { icon: '🚚', title: 'On-Time Delivery', desc: 'Fresh by 7 AM every morning', bg: 'linear-gradient(135deg,#e8f5e9,#a5d6a7)', border: '#2e7d32', iconBg: '#c8e6c9' },
+  { icon: '🌿', title: 'No Chemicals', desc: 'Zero preservatives, 100% natural', bg: 'linear-gradient(135deg,#fce4ec,#f48fb1)', border: '#c62828', iconBg: '#fce4ec' },
 ];
 
 function ImageSlider({ onShop, onSubscribe }) {
@@ -192,8 +192,8 @@ export default function Home() {
           <div className="section-header"><div className="section-title">Kyun Karein <span>Milqon Par Bharosa?</span></div></div>
           <div className="trust-grid">
             {trustItems.map(t => (
-              <div key={t.title} className="trust-card">
-                <div className="trust-icon">{t.icon}</div>
+              <div key={t.title} className="trust-card" style={{ background: t.bg, border: `2px solid ${t.border}`, borderRadius: 16 }}>
+                <div className="trust-icon" style={{ background: t.iconBg, borderRadius: '50%', width: 64, height: 64, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, margin: '0 auto 12px' }}>{t.icon}</div>
                 <div className="trust-title">{t.title}</div>
                 <div className="trust-desc">{t.desc}</div>
               </div>
