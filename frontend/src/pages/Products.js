@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../api';
 import { useCart } from '../context/CartContext';
 
@@ -75,6 +75,7 @@ export default function Products() {
   const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -120,7 +121,7 @@ export default function Products() {
           {products.map(p => {
             const badge = BADGE[p.category];
             return (
-              <div key={p._id} className="product-card">
+              <div key={p._id} className="product-card" onClick={() => navigate(`/products/${p._id}`)} style={{ cursor: 'pointer' }}>
                 <div className="product-img">
                   {badge && <span className={`product-badge ${BADGE_CLASS[badge] || ''}`}>{badge}</span>}
                   {PRODUCT_IMAGE[p.name]

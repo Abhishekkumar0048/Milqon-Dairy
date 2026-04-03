@@ -9,6 +9,8 @@ export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPass, setShowPass] = useState(false);
   const [slide, setSlide] = useState(0);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -18,13 +20,16 @@ export default function Login() {
   }, []);
 
   const handleLogin = async () => {
+    if (!form.email || !form.password) return setError('Please enter email and password');
+    setLoading(true); setError('');
     try {
       const { data } = await api.post('/auth/login', form);
       login(data.user, data.token);
       navigate('/');
     } catch (err) {
-      alert(err.response?.data?.message || 'Login failed');
+      setError(err.response?.data?.message || 'Login failed. Please try again.');
     }
+    setLoading(false);
   };
 
   return (
@@ -58,7 +63,14 @@ export default function Login() {
             </button>
           </div>
         </div>
-        <button className="btn btn-primary" style={{ width: '100%', padding: 14 }} onClick={handleLogin}>Login</button>
+        <button className="btn btn-primary" style={{ width: '100%', padding: 14 }} onClick={handleLogin} disabled={loading}>
+          {loading ? 'Logging in...' : 'Login'}
+        </button>
+        {error && (
+          <div style={{ marginTop: 12, padding: '10px 14px', background: '#fce4ec', color: '#c62828', borderRadius: 10, fontSize: 13, fontWeight: 600, textAlign: 'center' }}>
+            ❌ {error}
+          </div>
+        )}
         <div style={{ textAlign: 'right', marginTop: 8 }}>
           <a href="/forgot-password" style={{ fontSize: 13, color: '#2e7d32', fontWeight: 600 }}>Forgot Password?</a>
         </div>

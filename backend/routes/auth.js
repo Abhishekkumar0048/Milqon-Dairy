@@ -59,28 +59,50 @@ router.post('/login',
   }
 );
 
-// Send OTP for forgot password
+// Send OTP for forgot password (email or phone)
 router.post('/forgot-password', async (req, res) => {
   try {
-    const { email } = req.body;
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: 'No account found with this email' });
+    const { email, phone } = req.body;
+    let user;
+    if (phone) {
+      user = await User.findOne({ phone });
+    } else if (email) {
+      user = await User.findOne({ email });
+    }
+    if (!user) return res.status(404).json({ message: 'No account found' });
+
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    otpStore[email] = { otp, expiry: Date.now() + 10 * 60 * 1000 }; // 10 min
-    await transporter.sendMail({
-      from: `"Milqon Dairy" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: 'Password Reset OTP — Milqon Dairy',
-      html: `<div style="font-family:sans-serif;max-width:400px;margin:auto;padding:24px;border:1px solid #e0e0e0;border-radius:12px">
-        <h2 style="color:#2e7d32">🥛 Milqon Dairy</h2>
-        <p>Your OTP to reset password:</p>
-        <div style="font-size:36px;font-weight:900;color:#1b5e20;letter-spacing:8px;text-align:center;padding:16px;background:#f1f8e9;border-radius:8px">${otp}</div>
-        <p style="color:#888;font-size:13px;margin-top:16px">Valid for 10 minutes. Do not share with anyone.</p>
-      </div>`,
-    });
-    res.json({ message: 'OTP sent to your email' });
+    const key = user.email;
+    otpStore[key] = { otp, expiry: Date.now() + 10 * 60 * 1000 };
+
+    // Always log OTP in console (for admin to share if email fails)
+    console.log(`\n🔑 OTP for ${user.email} (${user.name}): ${otp}\n`);
+
+    // Try sending email, but don't fail if email config missing
+    const emailConfigured = process.env.EMAIL_USER && process.env.EMAIL_USER !== 'your_gmail@gmail.com';
+    if (emailConfigured) {
+      try {
+        await transporter.sendMail({
+          from: `"Milqon Dairy" <${process.env.EMAIL_USER}>`,
+          to: user.email,
+          subject: 'Password Reset OTP — Milqon Dairy',
+          html: `<div style="font-family:sans-serif;max-width:400px;margin:auto;padding:24px;border:1px solid #e0e0e0;border-radius:12px">
+            <h2 style="color:#2e7d32">🥛 Milqon Dairy</h2>
+            <p>Your OTP to reset password:</p>
+            <div style="font-size:36px;font-weight:900;color:#1b5e20;letter-spacing:8px;text-align:center;padding:16px;background:#f1f8e9;border-radius:8px">${otp}</div>
+            <p style="color:#888;font-size:13px;margin-top:16px">Valid for 10 minutes. Do not share with anyone.</p>
+          </div>`,
+        });
+        return res.json({ message: `OTP sent to ${user.email}`, email: user.email });
+      } catch (mailErr) {
+        console.error('Email send failed:', mailErr.message);
+      }
+    }
+
+    // Email not configured or failed — return OTP directly (dev/admin use)
+    res.json({ message: 'OTP generated', email: user.email, otp });
   } catch (err) {
-    res.status(500).json({ message: 'Failed to send OTP. Check email config.' });
+    res.status(500).json({ message: err.message });
   }
 });
 
@@ -95,9 +117,7 @@ router.post('/reset-password', async (req, res) => {
     await User.findOneAndUpdate({ email }, { password: hashed });
     delete otpStore[email];
     res.json({ message: 'Password reset successfully' });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
+  } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
 // Update profile (name, email, password)

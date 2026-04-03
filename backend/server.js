@@ -8,7 +8,7 @@ require('dotenv').config();
 const app = express();
 
 app.use(helmet({ crossOriginResourcePolicy: false }));
-app.use(cors({ origin: ['http://localhost:3000', 'https://milqon-dairy.vercel.app'], credentials: true }));
+app.use(cors({ origin: ['http://localhost:3000', 'http://localhost:3001', 'https://milqon-dairy.vercel.app'], credentials: true }));
 app.use(express.json());
 
 // Rate limiting — 100 requests per 15 min per IP
@@ -25,6 +25,8 @@ app.use('/api/products', require('./routes/products'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/payment', require('./routes/payment'));
+app.use('/api/support', require('./routes/support'));
+app.use('/api/subscriptions', require('./routes/subscriptions'));
 
 mongoose.connect(process.env.MONGO_URI)
   .then(async () => {

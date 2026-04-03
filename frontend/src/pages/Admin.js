@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
+import SubscriptionAdmin from './SubscriptionAdmin';
 
 const CATEGORIES = ['milk', 'paneer', 'curd', 'ghee', 'butter'];
 const EMOJI = { milk: '🥛', paneer: '🧀', curd: '🍶', ghee: '🧈', butter: '🧈' };
@@ -8,8 +10,14 @@ const STATUS_COLORS = { pending: '#fff3e0', confirmed: '#e8f5e9', delivered: '#e
 const STATUS_TEXT   = { pending: '#e65100', confirmed: '#2e7d32', delivered: '#1565c0', out_for_delivery: '#6a1b9a', cancelled: '#c62828' };
 
 export default function Admin() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [tab, setTab] = useState('orders');
+  const [showCreds, setShowCreds] = useState(false);
+  const [credForm, setCredForm] = useState({ email: '', currentPassword: '', newPassword: '' });
+  const [credMsg, setCredMsg] = useState('');
+  const [credLoading, setCredLoading] = useState(false);
+  const setC = (k, v) => setCredForm(f => ({ ...f, [k]: v }));
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState({ name: '', category: 'milk', price: '', unit: '1L', description: '', inStock: true });
@@ -75,10 +83,65 @@ export default function Admin() {
   return (
     <div style={{ background: '#f0f4f0', minHeight: '100vh', paddingBottom: 40 }}>
       {/* Header */}
-      <div style={{ background: '#2e7d32', color: '#fff', padding: '20px 24px' }}>
-        <h2 style={{ margin: 0, fontSize: 22 }}>⚙️ Admin Dashboard</h2>
-        <p style={{ margin: '4px 0 0', color: '#c8e6c9', fontSize: 13 }}>Milqon Dairy — Management Panel</p>
+      <div style={{ background: '#2e7d32', color: '#fff', padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2 style={{ margin: 0, fontSize: 22 }}>⚙️ Admin Dashboard</h2>
+          <p style={{ margin: '4px 0 0', color: '#c8e6c9', fontSize: 13 }}>Milqon Dairy — Management Panel</p>
+        </div>
+        <button onClick={() => { setShowCreds(true); setCredMsg(''); setCredForm({ email: user?.email || '', currentPassword: '', newPassword: '' }); }}
+          style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1.5px solid rgba(255,255,255,0.4)', borderRadius: 10, padding: '8px 16px', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+          🔒 Change Credentials
+        </button>
       </div>
+
+      {/* Change Credentials Modal */}
+      {showCreds && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          onClick={e => e.target === e.currentTarget && setShowCreds(false)}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 28, width: '100%', maxWidth: 400, boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h3 style={{ margin: 0, color: '#1b5e20' }}>🔒 Change Admin Credentials</h3>
+              <button onClick={() => setShowCreds(false)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#888' }}>✕</button>
+            </div>
+            <div className="form-group">
+              <label>New Email</label>
+              <input type="email" value={credForm.email} onChange={e => setC('email', e.target.value)} placeholder="admin@milqondairy.com" />
+            </div>
+            <div className="form-group">
+              <label>Current Password</label>
+              <input type="password" value={credForm.currentPassword} onChange={e => setC('currentPassword', e.target.value)} placeholder="Enter current password" />
+            </div>
+            <div className="form-group">
+              <label>New Password <span style={{ color: '#888', fontWeight: 400, fontSize: 12 }}>(leave blank to keep same)</span></label>
+              <input type="password" value={credForm.newPassword} onChange={e => setC('newPassword', e.target.value)} placeholder="Min 6 characters" />
+            </div>
+            {credMsg && <div style={{ padding: '10px 14px', borderRadius: 8, background: credMsg.includes('✅') ? '#e8f5e9' : '#fce4ec', color: credMsg.includes('✅') ? '#2e7d32' : '#c62828', fontSize: 13, fontWeight: 600, marginBottom: 12 }}>{credMsg}</div>}
+            <button className="btn btn-primary" style={{ width: '100%', padding: 12 }} disabled={credLoading}
+              onClick={async () => {
+                if (!credForm.currentPassword) return setCredMsg('Current password required');
+                setCredLoading(true);
+                try {
+                  const payload = { email: credForm.email, currentPassword: credForm.currentPassword };
+                  if (credForm.newPassword) payload.newPassword = credForm.newPassword;
+                  await api.put('/auth/profile', payload);
+                  setCredMsg('✅ Credentials updated! Please login again.');
+                  setTimeout(() => { setShowCreds(false); logout(); navigate('/login'); }, 2000);
+                } catch (err) {
+                  setCredMsg(err.response?.data?.message || 'Update failed');
+                }
+                setCredLoading(false);
+              }}>
+              {credLoading ? 'Saving...' : 'Save Changes'}
+            </button>
+            <div style={{ textAlign: 'center', marginTop: 12 }}>
+              <button onClick={() => { setShowCreds(false); navigate('/forgot-password'); }}
+                style={{ background: 'none', border: 'none', color: '#2e7d32', fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>
+                Forgot current password? → Reset via OTP
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="container" style={{ paddingTop: 20 }}>
 
@@ -117,6 +180,7 @@ export default function Admin() {
         <div className="tabs">
           <button className={`tab${tab === 'orders' ? ' active' : ''}`} onClick={() => setTab('orders')}>📦 Orders ({orders.length})</button>
           <button className={`tab${tab === 'products' ? ' active' : ''}`} onClick={() => setTab('products')}>🛍️ Products ({products.length})</button>
+          <button className={`tab${tab === 'subscriptions' ? ' active' : ''}`} onClick={() => setTab('subscriptions')}>🥛 Subscriptions</button>
         </div>
 
         {/* Orders Tab */}
@@ -275,6 +339,9 @@ export default function Admin() {
             </div>
           </div>
         )}
+        {/* Subscriptions Tab */}
+        {tab === 'subscriptions' && <SubscriptionAdmin />}
+
       </div>
     </div>
   );

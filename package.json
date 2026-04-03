@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "expo": "~52.0.0",
     "razorpay": "^2.9.6"
   }
 }
