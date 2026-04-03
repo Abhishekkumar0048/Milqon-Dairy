@@ -17,7 +17,7 @@ const orderSchema = new mongoose.Schema({
     }
   ],
   totalAmount:   { type: Number, required: true },
-  paymentMethod:    { type: String, enum: ['cod', 'gpay', 'phonepe', 'bhimupi', 'paytm'], default: 'cod' },
+  paymentMethod:    { type: String, enum: ['cod', 'gpay', 'phonepe', 'bhimupi', 'paytm', 'razorpay'], default: 'cod' },
   upiTransactionId: { type: String },
   paymentStatus:    { type: String, enum: ['pending', 'paid', 'failed'], default: 'pending' },
   status:        { type: String, enum: ['pending', 'confirmed', 'out_for_delivery', 'delivered', 'cancelled'], default: 'pending' },
