@@ -17,6 +17,7 @@ import Profile from './pages/Profile';
 import ProductDetail from './pages/ProductDetail';
 import Help from './pages/Help';
 import MySubscription from './pages/MySubscription';
+import AdminLogin from './pages/AdminLogin';
 
 function Navbar() {
   const { user, logout } = useAuth();
@@ -26,7 +27,7 @@ function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
 
-  const hideNav = ['/login', '/register', '/forgot-password', '/staff-login'].includes(location.pathname);
+  const hideNav = ['/login', '/register', '/forgot-password', '/staff-login', '/admin-login'].includes(location.pathname);
   if (hideNav) return null;
 
   const closeAll = () => { setMenuOpen(false); setAccountOpen(false); };
@@ -139,7 +140,7 @@ function Navbar() {
 
 function Footer() {
   const location = useLocation();
-  const hideFooter = ['/login', '/register', '/forgot-password', '/staff-login'].includes(location.pathname);
+  const hideFooter = ['/login', '/register', '/forgot-password', '/staff-login', '/admin-login'].includes(location.pathname);
   if (hideFooter) return null;
   return (
     <footer className="footer">
@@ -183,6 +184,7 @@ export default function App() {
             <Route path="/products/:id" element={<ProductDetail />} />
             <Route path="/help" element={<Help />} />
             <Route path="/my-subscription" element={<MySubscription />} />
+            <Route path="/admin-login" element={<AdminLogin />} />
           </Routes>
           <Footer />
         </BrowserRouter>
