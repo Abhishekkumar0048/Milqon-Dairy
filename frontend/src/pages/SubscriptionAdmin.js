@@ -20,8 +20,9 @@ export default function SubscriptionAdmin() {
     setSubs(data);
   };
 
-  const pendingSubs = subs.filter(s => !s.active && !s.attendance?.length);
-  const activeSubs = subs.filter(s => s.active || s.attendance?.length);
+  const pendingSubs = subs.filter(s => !s.active && !s.attendance?.length && !s.cancelled);
+  const activeSubs = subs.filter(s => (s.active || s.attendance?.length) && !s.cancelled);
+  const cancelledSubs = subs.filter(s => s.cancelled);
 
   const addSub = async () => {
     if (!form.name || !form.phone || !form.address) return alert('Fill all fields');
@@ -142,6 +143,22 @@ export default function SubscriptionAdmin() {
       </div>
 
       {activeSubs.length === 0 && pendingSubs.length === 0 && <div style={{ textAlign: 'center', padding: 40, color: '#888' }}>No subscriptions yet. Add your first customer!</div>}
+
+      {/* Cancelled Subscriptions */}
+      {cancelledSubs.length > 0 && (
+        <div style={{ background: '#fce4ec', borderRadius: 14, padding: 16, marginBottom: 20, border: '1.5px solid #ef9a9a' }}>
+          <div style={{ fontWeight: 800, fontSize: 15, color: '#c62828', marginBottom: 12 }}>❌ Cancelled Subscriptions ({cancelledSubs.length})</div>
+          {cancelledSubs.map(sub => (
+            <div key={sub._id} style={{ background: '#fff', borderRadius: 10, padding: '12px 14px', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+              <div style={{ fontSize: 14 }}>
+                <strong>{sub.name}</strong> &nbsp;|&nbsp; 📞 {sub.phone} &nbsp;|&nbsp; 📍 {sub.address}
+                <span style={{ marginLeft: 8, color: '#c62828', fontWeight: 700 }}>🥛 {sub.quantity}L/day</span>
+              </div>
+              <button onClick={() => deleteSub(sub._id)} style={{ background: '#fce4ec', color: '#c62828', border: 'none', borderRadius: 8, padding: '6px 14px', fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>🗑️ Remove</button>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Subscription Cards */}
       {activeSubs.map(sub => {
