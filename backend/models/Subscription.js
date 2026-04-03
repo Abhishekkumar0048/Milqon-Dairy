@@ -15,6 +15,7 @@ const subscriptionSchema = new mongoose.Schema({
   quantity:   { type: Number, required: true },  // litres per day e.g. 0.5, 1, 2
   pricePerLitre: { type: Number, required: true },
   startDate:  { type: String, required: true },  // YYYY-MM-DD
+  deliveryTime: { type: String, enum: ['morning', 'evening'], default: 'morning' },
   active:     { type: Boolean, default: true },
   cancelled:  { type: Boolean, default: false },
   attendance: [attendanceSchema],

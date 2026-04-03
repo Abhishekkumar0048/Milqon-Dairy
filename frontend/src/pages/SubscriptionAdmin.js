@@ -6,10 +6,11 @@ const monthName = (m) => ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep',
 
 export default function SubscriptionAdmin() {
   const [subs, setSubs] = useState([]);
-  const [form, setForm] = useState({ name: '', phone: '', address: '', quantity: 1, pricePerLitre: 60, startDate: today() });
+  const [search, setSearch] = useState('');
+  const [activeTab, setActiveTab] = useState('morning');
+  const [form, setForm] = useState({ name: '', phone: '', address: '', quantity: 1, pricePerLitre: 60, startDate: today(), deliveryTime: 'morning' });
   const [selMonth, setSelMonth] = useState(new Date().getMonth() + 1);
   const [selYear, setSelYear] = useState(new Date().getFullYear());
-  const [bills, setBills] = useState({});
   const [showForm, setShowForm] = useState(false);
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -21,13 +22,20 @@ export default function SubscriptionAdmin() {
   };
 
   const pendingSubs = subs.filter(s => !s.active && !s.attendance?.length && !s.cancelled);
-  const activeSubs = subs.filter(s => (s.active || s.attendance?.length) && !s.cancelled);
   const cancelledSubs = subs.filter(s => s.cancelled);
+  const morningSubs = subs.filter(s => (s.active || s.attendance?.length) && !s.cancelled && s.deliveryTime !== 'evening');
+  const eveningSubs = subs.filter(s => (s.active || s.attendance?.length) && !s.cancelled && s.deliveryTime === 'evening');
+  const activeSubs = activeTab === 'morning' ? morningSubs : eveningSubs;
+  const filtered = activeSubs.filter(s =>
+    s.name?.toLowerCase().includes(search.toLowerCase()) ||
+    s.phone?.includes(search) ||
+    s.address?.toLowerCase().includes(search.toLowerCase())
+  );
 
   const addSub = async () => {
     if (!form.name || !form.phone || !form.address) return alert('Fill all fields');
     await api.post('/subscriptions', { ...form, milkType: 'Full Cream Milk', quantity: Number(form.quantity), pricePerLitre: Number(form.pricePerLitre) });
-    setForm({ name: '', phone: '', address: '', quantity: 1, pricePerLitre: 60, startDate: today() });
+    setForm({ name: '', phone: '', address: '', quantity: 1, pricePerLitre: 60, startDate: today(), deliveryTime: 'morning' });
     setShowForm(false);
     fetchSubs();
   };
@@ -48,12 +56,6 @@ export default function SubscriptionAdmin() {
     setSubs(prev => prev.filter(s => s._id !== id));
   };
 
-  const fetchBill = async (id) => {
-    const { data } = await api.get(`/subscriptions/${id}/bill?month=${selMonth}&year=${selYear}`);
-    setBills(prev => ({ ...prev, [id]: data }));
-  };
-
-  // Get days in selected month
   const daysInMonth = new Date(selYear, selMonth, 0).getDate();
   const monthDates = Array.from({ length: daysInMonth }, (_, i) => {
     const d = i + 1;
@@ -104,6 +106,17 @@ export default function SubscriptionAdmin() {
               <label>Start Date</label>
               <input type="date" value={form.startDate} onChange={e => set('startDate', e.target.value)} />
             </div>
+            <div className="form-group" style={{ marginBottom: 0, gridColumn: '1/-1' }}>
+              <label>Delivery Time</label>
+              <div style={{ display: 'flex', gap: 12 }}>
+                {['morning','evening'].map(t => (
+                  <button key={t} type="button" onClick={() => set('deliveryTime', t)}
+                    style={{ flex: 1, padding: '10px', borderRadius: 10, border: `2px solid ${form.deliveryTime === t ? '#2e7d32' : '#e0e0e0'}`, background: form.deliveryTime === t ? '#e8f5e9' : '#fff', fontWeight: 700, cursor: 'pointer' }}>
+                    {t === 'morning' ? '🌅 Morning' : '🌆 Evening'}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
           <button onClick={addSub} style={{ marginTop: 14, width: '100%', padding: 12, background: '#2e7d32', color: '#fff', border: 'none', borderRadius: 10, fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>
             ✅ Save Subscription
@@ -114,12 +127,13 @@ export default function SubscriptionAdmin() {
       {/* Pending Requests */}
       {pendingSubs.length > 0 && (
         <div style={{ background: '#fff3e0', borderRadius: 14, padding: 16, marginBottom: 20, border: '1.5px solid #ffcc80' }}>
-          <div style={{ fontWeight: 800, fontSize: 15, color: '#e65100', marginBottom: 12 }}>⏳ Pending Subscription Requests ({pendingSubs.length})</div>
+          <div style={{ fontWeight: 800, fontSize: 15, color: '#e65100', marginBottom: 12 }}>⏳ Pending Requests ({pendingSubs.length})</div>
           {pendingSubs.map(sub => (
             <div key={sub._id} style={{ background: '#fff', borderRadius: 10, padding: '12px 14px', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
               <div style={{ fontSize: 14 }}>
                 <strong>{sub.name}</strong> &nbsp;|&nbsp; 📞 {sub.phone} &nbsp;|&nbsp; 📍 {sub.address}
                 <span style={{ marginLeft: 8, color: '#1b5e20', fontWeight: 700 }}>🥛 {sub.quantity}L/day</span>
+                <span style={{ marginLeft: 8, color: '#e65100', fontWeight: 700 }}>{sub.deliveryTime === 'evening' ? '🌆 Evening' : '🌅 Morning'}</span>
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
                 <button onClick={() => toggleActive(sub)} style={{ background: '#2e7d32', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 14px', fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>✅ Approve</button>
@@ -130,50 +144,50 @@ export default function SubscriptionAdmin() {
         </div>
       )}
 
+      {/* Search + Morning/Evening Tabs */}
+      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
+        <input
+          placeholder="🔍 Search by name, phone, address..."
+          value={search} onChange={e => setSearch(e.target.value)}
+          style={{ flex: 1, minWidth: 200, padding: '10px 14px', borderRadius: 10, border: '1.5px solid #e0e0e0', fontSize: 14 }}
+        />
+        <div style={{ display: 'flex', borderRadius: 10, overflow: 'hidden', border: '1.5px solid #e0e0e0' }}>
+          <button onClick={() => setActiveTab('morning')}
+            style={{ padding: '10px 20px', background: activeTab === 'morning' ? '#ff8f00' : '#fff', color: activeTab === 'morning' ? '#fff' : '#555', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}>
+            🌅 Morning ({morningSubs.length})
+          </button>
+          <button onClick={() => setActiveTab('evening')}
+            style={{ padding: '10px 20px', background: activeTab === 'evening' ? '#5c35cc' : '#fff', color: activeTab === 'evening' ? '#fff' : '#555', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}>
+            🌆 Evening ({eveningSubs.length})
+          </button>
+        </div>
+      </div>
+
       {/* Month Selector */}
       <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 20, background: '#fff', padding: '12px 16px', borderRadius: 12, boxShadow: '0 1px 4px rgba(0,0,0,0.07)' }}>
-        <span style={{ fontWeight: 700, fontSize: 14 }}>📅 Attendance Month:</span>
+        <span style={{ fontWeight: 700, fontSize: 14 }}>📅 Month:</span>
         <select value={selMonth} onChange={e => setSelMonth(Number(e.target.value))} style={{ padding: '6px 12px', borderRadius: 8, border: '1.5px solid #e0e0e0', fontWeight: 600 }}>
           {Array.from({length:12},(_,i)=>i+1).map(m => <option key={m} value={m}>{monthName(m)}</option>)}
         </select>
         <select value={selYear} onChange={e => setSelYear(Number(e.target.value))} style={{ padding: '6px 12px', borderRadius: 8, border: '1.5px solid #e0e0e0', fontWeight: 600 }}>
           {[2024,2025,2026].map(y => <option key={y} value={y}>{y}</option>)}
         </select>
-        <span style={{ fontSize: 13, color: '#888' }}>{subs.filter(s=>s.active).length} active subscribers</span>
+        <span style={{ fontSize: 13, color: '#888' }}>{subs.filter(s=>s.active).length} active</span>
       </div>
 
-      {activeSubs.length === 0 && pendingSubs.length === 0 && <div style={{ textAlign: 'center', padding: 40, color: '#888' }}>No subscriptions yet. Add your first customer!</div>}
-
-      {/* Cancelled Subscriptions */}
-      {cancelledSubs.length > 0 && (
-        <div style={{ background: '#fce4ec', borderRadius: 14, padding: 16, marginBottom: 20, border: '1.5px solid #ef9a9a' }}>
-          <div style={{ fontWeight: 800, fontSize: 15, color: '#c62828', marginBottom: 12 }}>❌ Cancelled Subscriptions ({cancelledSubs.length})</div>
-          {cancelledSubs.map(sub => (
-            <div key={sub._id} style={{ background: '#fff', borderRadius: 10, padding: '12px 14px', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-              <div style={{ fontSize: 14 }}>
-                <strong>{sub.name}</strong> &nbsp;|&nbsp; 📞 {sub.phone} &nbsp;|&nbsp; 📍 {sub.address}
-                <span style={{ marginLeft: 8, color: '#c62828', fontWeight: 700 }}>🥛 {sub.quantity}L/day</span>
-              </div>
-              <button onClick={() => deleteSub(sub._id)} style={{ background: '#fce4ec', color: '#c62828', border: 'none', borderRadius: 8, padding: '6px 14px', fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>🗑️ Remove</button>
-            </div>
-          ))}
-        </div>
-      )}
+      {filtered.length === 0 && <div style={{ textAlign: 'center', padding: 40, color: '#888' }}>No {activeTab} subscriptions found.</div>}
 
       {/* Subscription Cards */}
-      {activeSubs.map(sub => {
-        const bill = bills[sub._id];
+      {filtered.map(sub => {
         const monthAtt = sub.attendance?.filter(a => a.date.startsWith(`${selYear}-${String(selMonth).padStart(2,'0')}`)) || [];
         const deliveredCount = monthAtt.filter(a => a.delivered).length;
         const monthTotal = deliveredCount * sub.quantity * sub.pricePerLitre;
 
         return (
-          <div key={sub._id} style={{ background: '#fff', borderRadius: 16, padding: 20, marginBottom: 16, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', borderLeft: `4px solid ${sub.active ? '#2e7d32' : '#ccc'}` }}>
-
-            {/* Customer Header */}
+          <div key={sub._id} style={{ background: '#fff', borderRadius: 16, padding: 20, marginBottom: 16, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', borderLeft: `4px solid ${sub.active ? (activeTab === 'morning' ? '#ff8f00' : '#5c35cc') : '#ccc'}` }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
               <div>
-                <div style={{ fontWeight: 800, fontSize: 16 }}>👤 {sub.name}</div>
+                <div style={{ fontWeight: 800, fontSize: 16 }}>👤 {sub.name} <span style={{ fontSize: 13, fontWeight: 600, color: activeTab === 'morning' ? '#ff8f00' : '#5c35cc' }}>{sub.deliveryTime === 'evening' ? '🌆 Evening' : '🌅 Morning'}</span></div>
                 <div style={{ fontSize: 13, color: '#666', marginTop: 2 }}>📞 {sub.phone} &nbsp;|&nbsp; 📍 {sub.address}</div>
                 <div style={{ fontSize: 13, color: '#1b5e20', fontWeight: 700, marginTop: 4 }}>
                   🥛 {sub.quantity}L/day &nbsp;·&nbsp; ₹{sub.pricePerLitre}/L &nbsp;·&nbsp; Since {sub.startDate}
@@ -223,8 +237,7 @@ export default function SubscriptionAdmin() {
                       width: 36, height: 36, borderRadius: 8, border: 'none', cursor: isPast ? 'pointer' : 'default',
                       background: !isPast ? '#f5f5f5' : isDelivered ? '#2e7d32' : '#fce4ec',
                       color: !isPast ? '#ccc' : isDelivered ? '#fff' : '#c62828',
-                      fontWeight: 700, fontSize: 12,
-                      transition: 'transform 0.15s',
+                      fontWeight: 700, fontSize: 12, transition: 'transform 0.15s',
                     }}
                     onMouseEnter={e => { if(isPast) e.currentTarget.style.transform='scale(1.15)'; }}
                     onMouseLeave={e => e.currentTarget.style.transform='scale(1)'}>
@@ -241,6 +254,22 @@ export default function SubscriptionAdmin() {
           </div>
         );
       })}
+
+      {/* Cancelled Subscriptions */}
+      {cancelledSubs.length > 0 && (
+        <div style={{ background: '#fce4ec', borderRadius: 14, padding: 16, marginTop: 10, border: '1.5px solid #ef9a9a' }}>
+          <div style={{ fontWeight: 800, fontSize: 15, color: '#c62828', marginBottom: 12 }}>❌ Cancelled Subscriptions ({cancelledSubs.length})</div>
+          {cancelledSubs.map(sub => (
+            <div key={sub._id} style={{ background: '#fff', borderRadius: 10, padding: '12px 14px', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+              <div style={{ fontSize: 14 }}>
+                <strong>{sub.name}</strong> &nbsp;|&nbsp; 📞 {sub.phone} &nbsp;|&nbsp; 📍 {sub.address}
+                <span style={{ marginLeft: 8, color: '#c62828', fontWeight: 700 }}>🥛 {sub.quantity}L/day</span>
+              </div>
+              <button onClick={() => deleteSub(sub._id)} style={{ background: '#fce4ec', color: '#c62828', border: 'none', borderRadius: 8, padding: '6px 14px', fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>🗑️ Remove</button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -51,7 +51,7 @@ export default function MySubscription() {
   const [loading, setLoading] = useState(true);
   const [selMonth, setSelMonth] = useState(new Date().getMonth() + 1);
   const [selYear] = useState(new Date().getFullYear());
-  const [reqForm, setReqForm] = useState({ quantity: 1, address: '', phone: '', name: '' });
+  const [reqForm, setReqForm] = useState({ quantity: 1, address: '', phone: '', name: '', deliveryTime: 'morning' });
   const [reqMsg, setReqMsg] = useState('');
   const [reqLoading, setReqLoading] = useState(false);
   const setR = (k, v) => setReqForm(f => ({ ...f, [k]: v }));
@@ -116,8 +116,19 @@ export default function MySubscription() {
             <option value={3}>3 Litre — ₹180/day</option>
           </select>
         </div>
+        <div className="form-group">
+          <label>Delivery Time</label>
+          <div style={{ display: 'flex', gap: 12 }}>
+            {['morning','evening'].map(t => (
+              <button key={t} type="button" onClick={() => setR('deliveryTime', t)}
+                style={{ flex: 1, padding: '10px', borderRadius: 10, border: `2px solid ${reqForm.deliveryTime === t ? '#2e7d32' : '#e0e0e0'}`, background: reqForm.deliveryTime === t ? '#e8f5e9' : '#fff', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}>
+                {t === 'morning' ? '🌅 Morning' : '🌆 Evening'}
+              </button>
+            ))}
+          </div>
+        </div>
         <div style={{ background: '#f1f8e9', borderRadius: 10, padding: '12px 14px', marginBottom: 16, fontSize: 13, color: '#2e7d32' }}>
-          💰 Price: ₹60/Litre &nbsp;|&nbsp; 🥛 Full Cream Milk &nbsp;|&nbsp; 🚚 Morning Delivery
+          💰 Price: ₹60/Litre &nbsp;|&nbsp; 🥛 Full Cream Milk &nbsp;|&nbsp; {reqForm.deliveryTime === 'morning' ? '🌅 Morning Delivery' : '🌆 Evening Delivery'}
         </div>
         {reqMsg && <div style={{ padding: '10px 14px', borderRadius: 8, background: '#fce4ec', color: '#c62828', fontSize: 13, fontWeight: 600, marginBottom: 12 }}>{reqMsg}</div>}
         <button className="btn btn-primary" style={{ width: '100%', padding: 13 }} onClick={submitRequest} disabled={reqLoading}>
