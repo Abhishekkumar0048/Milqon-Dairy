@@ -28,6 +28,11 @@ app.use('/api/payment', require('./routes/payment'));
 app.use('/api/support', require('./routes/support'));
 app.use('/api/subscriptions', require('./routes/subscriptions'));
 
+// Self-ping to prevent Render cold start
+setInterval(() => {
+  fetch('https://milqon-dairy.onrender.com/api/products').catch(() => {});
+}, 4 * 60 * 1000); // every 4 minutes
+
 mongoose.connect(process.env.MONGO_URI)
   .then(async () => {
     console.log('MongoDB connected');
